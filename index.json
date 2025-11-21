@@ -11,7 +11,7 @@
       "US"
     ],
     "icon": "https://releases.moe/favicon.png",
-    "update": "gh:hayase-app/extensions",
+    "update": "gh:abhinavbedi/extensions",
     "code": "gh:abhinavbedi/extensions/seadex"
   },
   {
@@ -26,7 +26,7 @@
       "US"
     ],
     "icon": "https://animetosho.org/inc/favicon.ico",
-    "update": "gh:hayase-app/extensions",
+    "update": "gh:abhinavbedi/extensions",
     "code": "gh:abhinavbedi/extensions/animetosho"
   },
   {
@@ -41,7 +41,7 @@
       "US"
     ],
     "icon": "https://animetosho.org/inc/favicon.ico",
-    "update": "gh:hayase-app/extensions",
+    "update": "gh:abhinavbedi/extensions",
     "code": "gh:abhinavbedi/extensions/animetosho-nzb"
   },
   {
@@ -56,7 +56,7 @@
       "US"
     ],
     "icon": "https://nyaa.si/static/favicon.png",
-    "update": "gh:BeastBBoy/extensions",
+    "update": "gh:abhinavbedi/extensions",
     "code": "gh:abhinavbedi/extensions/nyaasi"
   },
   {
@@ -71,7 +71,7 @@
   ],
   "description": "Fetches torrents from The Pirate Bay via Torrents-API",
   "icon": "https://upload.wikimedia.org/wikipedia/en/3/36/The_Pirate_Bay_logo.svg",
-  "update": "gh:BeastBBoy/extensions",
+  "update": "gh:abhinavbedi/extensions",
   "code": "gh:abhinavbedi/extensions/piratebay"
 }
 
