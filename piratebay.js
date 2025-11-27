@@ -1,21 +1,28 @@
 import AbstractSource from './abstract.js'
 
-export default new class PirateBay extends AbstractSource {
-  base = 'https://torrent-search-api-livid.vercel.app/api/piratebay/'
+export default new class TorrentsCSV extends AbstractSource {
+  base = 'https://torrents-csv.com/service/search'
 
   /** @type {import('./').SearchFunction} */
-  async single({ titles, episode }) {
+  async single({ titles, episode, page = 1, size = 10 }) {
     if (!titles?.length) return []
 
     const query = this.buildQuery(titles[0], episode)
-    const url = `${this.base}${encodeURIComponent(query)}`
+    const url = `${this.base}?q=${encodeURIComponent(query)}&page=${page}&size=${size}`
 
-    const res = await fetch(url)
-    const data = await res.json()
+    try {
+      const res = await fetch(url)
+      if (!res.ok) return []
 
-    if (!Array.isArray(data)) return []
+      const data = await res.json()
+      // TorrentsCSV returns { results: [...] }
+      const results = Array.isArray(data) ? data : data.results || []
 
-    return this.map(data)
+      return this.map(results)
+    } catch (err) {
+      console.error('TorrentsCSV fetch error:', err)
+      return []
+    }
   }
 
   /** @type {import('./').SearchFunction} */
@@ -30,17 +37,16 @@ export default new class PirateBay extends AbstractSource {
 
   map(data) {
     return data.map(item => {
-      const hash = item.Magnet?.match(/btih:([a-fA-F0-9]+)/)?.[1] || ''
-
+      const hash = item.infohash || ''
       return {
-        title: item.Name || '',
-        link: item.Magnet || '',
+        title: item.name || '',
+        link: item.magnet || '',
         hash,
-        seeders: parseInt(item.Seeders || '0'),
-        leechers: parseInt(item.Leechers || '0'),
-        downloads: parseInt(item.Downloads || '0'),
-        size: this.parseSize(item.Size),
-        date: new Date(item.DateUploaded),
+        seeders: parseInt(item.seeders || '0'),
+        leechers: parseInt(item.leechers || '0'),
+        downloads: parseInt(item.completed || '0'),
+        size: this.parseSize(item.size || ''),
+        date: new Date(item.created_unix * 1000), // TorrentsCSV uses unix timestamp
         verified: false,
         type: 'alt',
         accuracy: 'medium'
@@ -49,7 +55,7 @@ export default new class PirateBay extends AbstractSource {
   }
 
   parseSize(sizeStr) {
-    const match = sizeStr.match(/([\d.]+)\s*(KiB|MiB|GiB|KB|MB|GB)/i)
+    const match = String(sizeStr).match(/([\d.]+)\s*(KiB|MiB|GiB|KB|MB|GB)/i)
     if (!match) return 0
 
     const value = parseFloat(match[1])
@@ -68,7 +74,7 @@ export default new class PirateBay extends AbstractSource {
 
   async test() {
     try {
-      const res = await fetch(this.base + 'one piece')
+      const res = await fetch(this.base + '?q=naruto&size=1')
       return res.ok
     } catch {
       return false
