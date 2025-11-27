@@ -4,23 +4,30 @@ export default new class TorrentsCSV extends AbstractSource {
   base = 'https://torrents-csv.com/service/search'
 
   /**
-   * Search for a single episode
+   * Single episode search
    * @type {import('./').SearchFunction}
    */
   async single({ titles, episode, resolution, exclusions, type }) {
     if (!titles?.length) return []
 
     const query = titles[0].trim()
-    const url = `${this.base}?q=${encodeURIComponent(query)}&size=20`
+    let url = `${this.base}?q=${encodeURIComponent(query)}&size=20`
+    let allResults = []
 
     try {
-      const res = await fetch(url)
-      if (!res.ok) return []
+      while (url) {
+        const res = await fetch(url)
+        if (!res.ok) break
 
-      const data = await res.json()
-      const results = data.torrents || []
+        const data = await res.json()
+        const results = data.torrents || []
+        allResults.push(...results)
 
-      return this.applyFilters(this.map(results), { episode, resolution, exclusions, type })
+        // Pagination support: use `next` if available
+        url = data.next ? `${this.base}?q=${encodeURIComponent(query)}&size=20&next=${data.next}` : null
+      }
+
+      return this.applyFilters(this.map(allResults), { episode, resolution, exclusions, type })
     } catch (err) {
       console.error('TorrentsCSV fetch error:', err)
       return []
